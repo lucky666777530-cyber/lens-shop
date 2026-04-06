@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>隱形眼鏡特賣</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0a;
+  --bg2: #111111;
+  --bg3: #181818;
+  --bg4: #222222;
+  --border: rgba(255,255,255,0.08);
+  --border2: rgba(255,255,255,0.15);
+  --gold: #c9a96e;
+  --gold2: #e8c98a;
+  --text: #f0ede8;
+  --text2: #999;
+  --text3: #666;
+  --green: #4caf7d;
+  --red: #e05555;
+  --amber: #e0a040;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { background: var(--bg); color: var(--text); font-family: 'Noto Sans TC', sans-serif; font-weight: 300; }
+body { min-height: 100vh; }
+
+/* ── HEADER ── */
+header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(10,10,10,0.92);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 20px;
+  height: 56px; display: flex; align-items: center; justify-content: space-between;
+}
+.logo { font-family: 'Cormorant Garamond', serif; font-size: 20px; letter-spacing: 3px; color: var(--gold); font-weight: 400; }
+.admin-btn { font-size: 12px; color: var(--text3); border: 1px solid var(--border2); padding: 6px 14px; border-radius: 20px; cursor: pointer; background: none; color: var(--text2); font-family: inherit; transition: all 0.2s; letter-spacing: 1px; }
+.admin-btn:hover { color: var(--gold); border-color: var(--gold); }
+
+/* ── VIEWS ── */
+.view { display: none; }
+.view.active { display: block; }
+
+/* ── CUSTOMER VIEW ── */
+.hero {
+  padding: 48px 20px 32px;
+  text-align: center;
+}
+.hero-title { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 300; letter-spacing: 4px; color: var(--gold); margin-bottom: 8px; }
+.hero-sub { font-size: 12px; color: var(--text3); letter-spacing: 3px; text-transform: uppercase; }
+
+.filter-section {
+  padding: 0 16px 24px;
+}
+.filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+.filter-label { font-size: 11px; color: var(--text3); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+
+select {
+  height: 40px;
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  padding: 0 12px;
+  font-size: 14px;
+  background: var(--bg3);
+  color: var(--text);
+  font-family: 'Noto Sans TC', sans-serif;
+  flex: 1; min-width: 120px;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23666'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+}
+select:focus { outline: none; border-color: var(--gold); }
+
+.results-count { font-size: 12px; color: var(--text3); letter-spacing: 1px; margin-bottom: 16px; padding: 0 16px; }
+
+.products-grid { padding: 0 12px 32px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media(min-width: 480px) { .products-grid { grid-template-columns: repeat(3, 1fr); } }
+
+.card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.2s, transform 0.2s;
+  cursor: pointer;
+}
+.card:hover { border-color: var(--border2); transform: translateY(-2px); }
+.card.sold-out { opacity: 0.4; pointer-events: none; }
+
+.card-img {
+  width: 100%; aspect-ratio: 1/1;
+  background: var(--bg3);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden; position: relative;
+}
+.card-img img { width: 100%; height: 100%; object-fit: cover; }
+.card-img .no-img { color: var(--text3); font-size: 28px; }
+
+.card-body { padding: 10px; }
+.card-name { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card-brand { font-size: 11px; color: var(--text3); margin-bottom: 8px; }
+.card-powers { display: flex; flex-wrap: wrap; gap: 3px; }
+.power-chip {
+  font-size: 10px; padding: 2px 6px; border-radius: 3px;
+  border: 1px solid var(--border2); color: var(--text2);
+  background: var(--bg4);
+}
+.power-chip.match { border-color: var(--gold); color: var(--gold); background: rgba(201,169,110,0.1); }
+.power-chip.oos { text-decoration: line-through; opacity: 0.35; }
+
+.status-dot {
+  position: absolute; top: 8px; right: 8px;
+  width: 8px; height: 8px; border-radius: 50%;
+}
+.status-dot.in { background: var(--green); box-shadow: 0 0 6px var(--green); }
+.status-dot.out { background: var(--red); }
+.status-dot.low { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
+
+/* ── MODAL ── */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+  z-index: 200; display: flex; align-items: flex-end;
+  opacity: 0; pointer-events: none; transition: opacity 0.25s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--bg2); width: 100%; border-radius: 20px 20px 0 0;
+  border: 1px solid var(--border2); border-bottom: none;
+  max-height: 85vh; overflow-y: auto;
+  transform: translateY(100%); transition: transform 0.3s ease;
+}
+.modal-overlay.open .modal { transform: translateY(0); }
+.modal-handle { width: 36px; height: 4px; background: var(--border2); border-radius: 2px; margin: 14px auto 0; }
+.modal-img { width: 100%; aspect-ratio: 4/3; background: var(--bg3); overflow: hidden; }
+.modal-img img { width: 100%; height: 100%; object-fit: cover; }
+.modal-content { padding: 20px; }
+.modal-name { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 400; color: var(--gold); margin-bottom: 4px; }
+.modal-brand { font-size: 12px; color: var(--text3); letter-spacing: 2px; margin-bottom: 20px; }
+.modal-section-title { font-size: 10px; color: var(--text3); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 10px; }
+.power-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 0; border-bottom: 1px solid var(--border);
+}
+.power-row:last-child { border-bottom: none; }
+.power-row .pw-label { font-size: 15px; font-weight: 500; }
+.pw-badge { font-size: 11px; padding: 3px 10px; border-radius: 20px; }
+.pw-badge.in { background: rgba(76,175,125,0.15); color: var(--green); border: 1px solid rgba(76,175,125,0.3); }
+.pw-badge.low { background: rgba(224,160,64,0.15); color: var(--amber); border: 1px solid rgba(224,160,64,0.3); }
+.pw-badge.out { background: rgba(224,85,85,0.1); color: var(--red); border: 1px solid rgba(224,85,85,0.2); }
+.modal-close { width: 100%; margin-top: 20px; padding: 14px; background: var(--bg3); border: 1px solid var(--border2); color: var(--text2); font-size: 14px; border-radius: 8px; cursor: pointer; font-family: inherit; transition: border-color 0.2s; letter-spacing: 1px; }
+.modal-close:hover { border-color: var(--gold); color: var(--gold); }
+
+/* ── PASSWORD SCREEN ── */
+.lock-screen {
+  min-height: 100vh; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; padding: 40px 20px;
+}
+.lock-icon { font-size: 32px; margin-bottom: 24px; color: var(--gold); }
+.lock-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; color: var(--gold); letter-spacing: 3px; margin-bottom: 32px; }
+.lock-form { width: 100%; max-width: 320px; }
+.lock-form input {
+  width: 100%; height: 48px; background: var(--bg3);
+  border: 1px solid var(--border2); border-radius: 6px;
+  color: var(--text); font-size: 16px; padding: 0 16px;
+  font-family: inherit; margin-bottom: 12px; text-align: center; letter-spacing: 4px;
+}
+.lock-form input:focus { outline: none; border-color: var(--gold); }
+.lock-submit {
+  width: 100%; height: 48px; background: var(--gold);
+  border: none; border-radius: 6px; color: #0a0a0a;
+  font-size: 14px; font-family: inherit; font-weight: 500;
+  letter-spacing: 2px; cursor: pointer; transition: background 0.2s;
+}
+.lock-submit:hover { background: var(--gold2); }
+.lock-err { font-size: 12px; color: var(--red); text-align: center; margin-top: 8px; height: 16px; }
+.lock-hint { font-size: 11px; color: var(--text3); text-align: center; margin-top: 16px; letter-spacing: 1px; }
+
+/* ── ADMIN VIEW ── */
+.admin-header {
+  padding: 20px 20px 0;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+}
+.admin-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; color: var(--gold); letter-spacing: 3px; }
+.admin-actions { display: flex; gap: 8px; }
+
+.btn {
+  height: 36px; padding: 0 16px; border-radius: 4px;
+  font-size: 13px; font-family: inherit; cursor: pointer;
+  border: 1px solid var(--border2); background: none; color: var(--text2);
+  letter-spacing: 1px; transition: all 0.15s;
+}
+.btn:hover { color: var(--text); border-color: var(--text2); }
+.btn-gold { background: var(--gold); color: #0a0a0a; border-color: var(--gold); font-weight: 500; }
+.btn-gold:hover { background: var(--gold2); border-color: var(--gold2); color: #0a0a0a; }
+.btn-danger { color: var(--red); border-color: rgba(224,85,85,0.3); }
+.btn-danger:hover { background: rgba(224,85,85,0.1); border-color: var(--red); }
+
+/* Add form */
+.add-panel {
+  margin: 20px 16px 0;
+  background: var(--bg2); border: 1px solid var(--border2);
+  border-radius: 8px; padding: 20px;
+}
+.add-panel-title { font-size: 12px; color: var(--gold); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 16px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+.form-group { display: flex; flex-direction: column; gap: 4px; }
+.form-group label { font-size: 11px; color: var(--text3); letter-spacing: 1px; }
+.form-group input, .form-group textarea {
+  background: var(--bg3); border: 1px solid var(--border2); border-radius: 4px;
+  color: var(--text); font-size: 14px; padding: 8px 12px; font-family: inherit;
+}
+.form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--gold); }
+.form-group textarea { resize: vertical; min-height: 70px; }
+.full-width { grid-column: 1 / -1; }
+
+/* Image upload */
+.img-upload-area {
+  border: 1px dashed var(--border2); border-radius: 6px;
+  padding: 20px; text-align: center; cursor: pointer;
+  transition: border-color 0.2s; position: relative; overflow: hidden;
+  background: var(--bg3);
+}
+.img-upload-area:hover { border-color: var(--gold); }
+.img-upload-area input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.img-upload-area .upload-icon { font-size: 24px; margin-bottom: 6px; }
+.img-upload-area .upload-text { font-size: 12px; color: var(--text3); }
+.img-preview { width: 80px; height: 80px; object-fit: cover; border-radius: 4px; margin: 8px auto 0; display: block; }
+
+/* Admin product list */
+.admin-products { padding: 16px; }
+.admin-card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 8px; margin-bottom: 12px; overflow: hidden;
+}
+.admin-card-header {
+  display: flex; align-items: center; gap: 12px; padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.admin-card-thumb {
+  width: 52px; height: 52px; border-radius: 6px;
+  background: var(--bg3); overflow: hidden; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; color: var(--text3);
+  font-size: 20px;
+}
+.admin-card-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.admin-card-info { flex: 1; min-width: 0; }
+.admin-card-name { font-size: 15px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.admin-card-brand { font-size: 12px; color: var(--text3); margin-top: 2px; }
+.admin-card-body { padding: 12px 14px; }
+.power-edit-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 0; border-bottom: 1px solid var(--border);
+}
+.power-edit-row:last-child { border-bottom: none; }
+.power-edit-row .pw-name { font-size: 13px; min-width: 52px; }
+.power-edit-row input[type=number] {
+  width: 70px; height: 32px; background: var(--bg3);
+  border: 1px solid var(--border2); border-radius: 4px;
+  color: var(--text); font-size: 14px; text-align: center; font-family: inherit;
+}
+.power-edit-row input[type=number]:focus { outline: none; border-color: var(--gold); }
+.power-edit-row .pw-status { font-size: 11px; margin-left: 4px; }
+.add-power-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.add-power-row input {
+  height: 32px; background: var(--bg3); border: 1px solid var(--border2);
+  border-radius: 4px; color: var(--text); font-size: 13px; padding: 0 10px; font-family: inherit;
+  width: 100px;
+}
+.add-power-row input:focus { outline: none; border-color: var(--gold); }
+
+.admin-card-footer {
+  padding: 10px 14px; border-top: 1px solid var(--border);
+  display: flex; gap: 8px; flex-wrap: wrap; align-items: center; justify-content: space-between;
+}
+
+/* edit image in admin card */
+.edit-img-btn { font-size: 11px; color: var(--text3); cursor: pointer; text-decoration: underline; }
+.edit-img-input { display: none; }
+
+/* toast */
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: var(--gold); color: #0a0a0a; font-size: 13px; font-weight: 500;
+  padding: 10px 24px; border-radius: 24px; letter-spacing: 1px;
+  opacity: 0; transition: all 0.25s; z-index: 999; pointer-events: none; white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+.empty-state { text-align: center; padding: 48px 20px; color: var(--text3); font-size: 14px; }
+
+/* save bar */
+.save-bar {
+  position: sticky; bottom: 0;
+  background: rgba(10,10,10,0.95); backdrop-filter: blur(12px);
+  border-top: 1px solid var(--border2);
+  padding: 12px 16px; display: flex; gap: 10px; align-items: center;
+}
+.save-bar .hint { font-size: 12px; color: var(--text3); flex: 1; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">LENS STUDIO</div>
+  <button class="admin-btn" id="header-admin-btn" onclick="gotoAdmin()">後台管理</button>
+</header>
+
+<!-- ========== CUSTOMER VIEW ========== -->
+<div class="view active" id="view-customer">
+  <div class="hero">
+    <div class="hero-title">特賣出清</div>
+    <div class="hero-sub">Contact Lens Sale</div>
+  </div>
+
+  <div class="filter-section">
+    <div class="filter-label">篩選條件</div>
+    <div class="filter-row">
+      <select id="f-power" onchange="renderCustomer()">
+        <option value="">全部度數</option>
+      </select>
+      <select id="f-brand" onchange="renderCustomer()">
+        <option value="">全部品牌</option>
+      </select>
+      <select id="f-stock" onchange="renderCustomer()">
+        <option value="in">只看有貨</option>
+        <option value="all">顯示全部</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="results-count" id="results-count"></div>
+  <div class="products-grid" id="products-grid"></div>
+</div>
+
+<!-- ========== LOCK SCREEN ========== -->
+<div class="view" id="view-lock">
+  <div class="lock-screen">
+    <div class="lock-icon">◈</div>
+    <div class="lock-title">後台管理</div>
+    <div class="lock-form">
+      <input type="password" id="pw-input" placeholder="輸入密碼" onkeydown="if(event.key==='Enter')checkPw()" />
+      <button class="lock-submit" onclick="checkPw()">進入</button>
+      <div class="lock-err" id="pw-err"></div>
+      <div class="lock-hint">預設密碼：1234（可在後台修改）</div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== ADMIN VIEW ========== -->
+<div class="view" id="view-admin">
+  <div class="admin-header">
+    <div class="admin-title">後台管理</div>
+    <div class="admin-actions">
+      <button class="btn" onclick="changePwPrompt()">修改密碼</button>
+      <button class="btn" onclick="showView('customer'); document.getElementById('header-admin-btn').style.display='block'">返回前台</button>
+    </div>
+  </div>
+
+  <!-- Add product form -->
+  <div class="add-panel">
+    <div class="add-panel-title">新增款式</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>款式名稱</label>
+        <input id="a-name" type="text" placeholder="例：月拋美瞳A款" />
+      </div>
+      <div class="form-group">
+        <label>品牌</label>
+        <input id="a-brand" type="text" placeholder="例：Acuvue" />
+      </div>
+      <div class="form-group full-width">
+        <label>可用度數（逗號分隔，例：100,150,200,300）</label>
+        <input id="a-powers" type="text" placeholder="100,150,200,250,300,350,400,450,500" />
+      </div>
+      <div class="form-group">
+        <label>每個度數初始數量</label>
+        <input id="a-qty" type="number" value="10" min="0" />
+      </div>
+      <div class="form-group">
+        <label>商品圖片</label>
+        <div class="img-upload-area" id="new-upload-area">
+          <div class="upload-icon">＋</div>
+          <div class="upload-text">點擊上傳圖片</div>
+          <input type="file" accept="image/*" onchange="previewNewImg(event)" />
+          <img id="new-img-preview" class="img-preview" style="display:none" />
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-gold" onclick="addProduct()" style="width:100%;height:42px;font-size:14px;">新增款式</button>
+  </div>
+
+  <!-- Product list -->
+  <div class="admin-products" id="admin-products"></div>
+
+  <!-- Save bar -->
+  <div class="save-bar">
+    <div class="hint">修改庫存後記得儲存</div>
+    <button class="btn btn-gold" onclick="saveAll()">儲存所有變更</button>
+  </div>
+</div>
+
+<!-- PRODUCT MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-img" id="modal-img"></div>
+    <div class="modal-content">
+      <div class="modal-name" id="modal-name"></div>
+      <div class="modal-brand" id="modal-brand"></div>
+      <div class="modal-section-title">各度數現貨</div>
+      <div id="modal-powers"></div>
+      <button class="modal-close" onclick="closeModal()">關閉</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── STATE ──
+const STORAGE_KEY = 'lens-shop-v2';
+const PW_KEY = 'lens-shop-pw';
+let data = [], nextId = 1;
+let newImgData = null;
+
+// ── STORAGE ──
+async function load() {
+  try {
+    const r = await window.storage.get(STORAGE_KEY);
+    if (r && r.value) {
+      const p = JSON.parse(r.value);
+      data = p.products || [];
+      nextId = p.nextId || (data.length + 1);
+    } else {
+      data = [
+        { id: 1, name: '月拋美瞳 A款', brand: 'EyeCandy', img: null, powers: {100:8,150:5,200:12,250:3,300:0,350:7} },
+        { id: 2, name: '日拋清透款', brand: 'Acuvue', img: null, powers: {100:0,200:15,250:8,300:6,400:2,500:0} },
+        { id: 3, name: '季拋大眼棕', brand: 'FreshLook', img: null, powers: {150:4,200:9,300:11,350:0,400:6} }
+      ];
+      nextId = 4;
+    }
+  } catch(e) { data = []; }
+  populateFilters();
+  renderCustomer();
+}
+
+async function save() {
+  try {
+    await window.storage.set(STORAGE_KEY, JSON.stringify({ products: data, nextId }));
+  } catch(e) {}
+}
+
+function getPassword() {
+  try { return localStorage.getItem(PW_KEY) || '1234'; } catch(e) { return '1234'; }
+}
+function setPassword(pw) {
+  try { localStorage.setItem(PW_KEY, pw); } catch(e) {}
+}
+
+// ── VIEWS ──
+function showView(v) {
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+  document.getElementById('view-' + v).classList.add('active');
+}
+
+function gotoAdmin() {
+  document.getElementById('header-admin-btn').style.display = 'none';
+  document.getElementById('pw-input').value = '';
+  document.getElementById('pw-err').textContent = '';
+  showView('lock');
+}
+
+function checkPw() {
+  const val = document.getElementById('pw-input').value;
+  if (val === getPassword()) {
+    showView('admin');
+    renderAdmin();
+  } else {
+    document.getElementById('pw-err').textContent = '密碼錯誤，請重試';
+    document.getElementById('pw-input').value = '';
+  }
+}
+
+function changePwPrompt() {
+  const np = prompt('請輸入新密碼（至少4位）');
+  if (!np) return;
+  if (np.length < 4) { showToast('密碼至少需要4位'); return; }
+  const cp = prompt('再次確認新密碼');
+  if (np !== cp) { showToast('兩次密碼不一致'); return; }
+  setPassword(np);
+  showToast('密碼已更新');
+}
+
+// ── FILTERS ──
+function allPowers() {
+  const s = new Set();
+  data.forEach(p => Object.keys(p.powers).forEach(k => s.add(Number(k))));
+  return [...s].sort((a,b) => a - b);
+}
+function allBrands() {
+  return [...new Set(data.map(p => p.brand).filter(Boolean))].sort();
+}
+
+function populateFilters() {
+  const pw = document.getElementById('f-power');
+  const br = document.getElementById('f-brand');
+  const cp = pw.value, cb = br.value;
+  pw.innerHTML = '<option value="">全部度數</option>';
+  allPowers().forEach(p => {
+    const o = document.createElement('option');
+    o.value = p; o.textContent = p + ' 度';
+    if (String(p) === cp) o.selected = true;
+    pw.appendChild(o);
+  });
+  br.innerHTML = '<option value="">全部品牌</option>';
+  allBrands().forEach(b => {
+    const o = document.createElement('option');
+    o.value = b; o.textContent = b;
+    if (b === cb) o.selected = true;
+    br.appendChild(o);
+  });
+}
+
+// ── CUSTOMER RENDER ──
+function renderCustomer() {
+  const pw = document.getElementById('f-power').value;
+  const br = document.getElementById('f-brand').value;
+  const sf = document.getElementById('f-stock').value;
+  const grid = document.getElementById('products-grid');
+
+  let results = data.filter(p => {
+    if (br && p.brand !== br) return false;
+    if (pw) {
+      const q = p.powers[Number(pw)];
+      if (q === undefined) return false;
+      if (sf === 'in' && q <= 0) return false;
+    } else {
+      if (sf === 'in' && !Object.values(p.powers).some(q => q > 0)) return false;
+    }
+    return true;
+  });
+
+  document.getElementById('results-count').textContent = `共 ${results.length} 款`;
+
+  if (!results.length) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1">查無符合款式</div>';
+    return;
+  }
+
+  const matchPow = pw ? Number(pw) : null;
+
+  grid.innerHTML = results.map(p => {
+    const hasStock = Object.values(p.powers).some(q => q > 0);
+    let dot = hasStock ? 'in' : 'out';
+    if (matchPow && p.powers[matchPow] !== undefined) {
+      const mq = p.powers[matchPow];
+      dot = mq <= 0 ? 'out' : mq <= 3 ? 'low' : 'in';
+    }
+    const imgHtml = p.img
+      ? `<img src="${p.img}" alt="${p.name}" loading="lazy">`
+      : `<span class="no-img">👁</span>`;
+    const chipsHtml = Object.entries(p.powers).slice(0,6).map(([k,v]) => {
+      const isMatch = matchPow && Number(k) === matchPow;
+      const cls = v <= 0 ? 'oos' : isMatch ? 'match' : '';
+      return `<span class="power-chip ${cls}">${k}</span>`;
+    }).join('') + (Object.keys(p.powers).length > 6 ? `<span class="power-chip">...</span>` : '');
+    return `<div class="card${!hasStock ? ' sold-out' : ''}" onclick="openModal(${p.id})">
+      <div class="card-img">
+        ${imgHtml}
+        <div class="status-dot ${dot}"></div>
+      </div>
+      <div class="card-body">
+        <div class="card-name">${p.name}</div>
+        <div class="card-brand">${p.brand}</div>
+        <div class="card-powers">${chipsHtml}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── MODAL ──
+function openModal(id) {
+  const p = data.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('modal-name').textContent = p.name;
+  document.getElementById('modal-brand').textContent = p.brand;
+  const mi = document.getElementById('modal-img');
+  mi.innerHTML = p.img ? `<img src="${p.img}" style="width:100%;height:100%;object-fit:cover">` : '';
+  mi.style.display = p.img ? 'block' : 'none';
+  const powersHtml = Object.entries(p.powers).sort((a,b) => a[0]-b[0]).map(([k,v]) => {
+    const cls = v <= 0 ? 'out' : v <= 3 ? 'low' : 'in';
+    const label = v <= 0 ? '缺貨' : v <= 3 ? `剩 ${v} 盒` : `有貨 ${v} 盒`;
+    return `<div class="power-row">
+      <span class="pw-label">${k} 度</span>
+      <span class="pw-badge ${cls}">${label}</span>
+    </div>`;
+  }).join('');
+  document.getElementById('modal-powers').innerHTML = powersHtml;
+  document.getElementById('modal-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modal-overlay')) return;
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ── ADMIN RENDER ──
+function renderAdmin() {
+  const container = document.getElementById('admin-products');
+  if (!data.length) {
+    container.innerHTML = '<div class="empty-state">尚無款式，請新增</div>';
+    return;
+  }
+  container.innerHTML = data.map(p => {
+    const thumbHtml = p.img
+      ? `<img src="${p.img}" alt="">`
+      : `👁`;
+    const powersHtml = Object.entries(p.powers).sort((a,b) => a[0]-b[0]).map(([k,v]) => {
+      const s = v <= 0 ? '缺貨' : v <= 3 ? '少量' : '有貨';
+      const sc = v <= 0 ? 'color:var(--red)' : v <= 3 ? 'color:var(--amber)' : 'color:var(--green)';
+      return `<div class="power-edit-row">
+        <span class="pw-name">${k} 度</span>
+        <input type="number" min="0" value="${v}" data-pid="${p.id}" data-pw="${k}" onchange="updateQty(${p.id},'${k}',this.value)" />
+        <span class="pw-status" style="${sc}">${s}</span>
+        <button class="btn btn-danger" style="height:28px;font-size:11px;padding:0 8px;margin-left:auto" onclick="deletePower(${p.id},'${k}')">移除</button>
+      </div>`;
+    }).join('');
+    return `<div class="admin-card" id="acard-${p.id}">
+      <div class="admin-card-header">
+        <div class="admin-card-thumb">${thumbHtml}</div>
+        <div class="admin-card-info">
+          <div class="admin-card-name">${p.name}</div>
+          <div class="admin-card-brand">${p.brand}</div>
+          <label class="edit-img-btn">
+            更換圖片
+            <input class="edit-img-input" type="file" accept="image/*" onchange="updateImg(event,${p.id})" />
+          </label>
+        </div>
+      </div>
+      <div class="admin-card-body">
+        ${powersHtml}
+        <div class="add-power-row">
+          <input type="number" id="np-pw-${p.id}" placeholder="度數" min="1" step="25" />
+          <input type="number" id="np-qty-${p.id}" placeholder="數量" min="0" value="10" />
+          <button class="btn" style="height:32px;font-size:12px" onclick="addPower(${p.id})">＋ 新增度數</button>
+        </div>
+      </div>
+      <div class="admin-card-footer">
+        <span style="font-size:12px;color:var(--text3)">總庫存：${Object.values(p.powers).reduce((a,b)=>a+b,0)} 盒</span>
+        <button class="btn btn-danger" onclick="deleteProduct(${p.id})">刪除款式</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── ADMIN ACTIONS ──
+function updateQty(pid, pw, val) {
+  const p = data.find(x => x.id === pid);
+  if (p) p.powers[Number(pw)] = Math.max(0, parseInt(val) || 0);
+}
+
+function deletePower(pid, pw) {
+  const p = data.find(x => x.id === pid);
+  if (p) { delete p.powers[Number(pw)]; renderAdmin(); }
+}
+
+function addPower(pid) {
+  const pwEl = document.getElementById(`np-pw-${pid}`);
+  const qtyEl = document.getElementById(`np-qty-${pid}`);
+  const pw = parseInt(pwEl.value);
+  const qty = parseInt(qtyEl.value) || 0;
+  if (!pw || pw <= 0) { showToast('請輸入有效度數'); return; }
+  const p = data.find(x => x.id === pid);
+  if (p) {
+    p.powers[pw] = qty;
+    pwEl.value = ''; qtyEl.value = '10';
+    renderAdmin();
+  }
+}
+
+function deleteProduct(pid) {
+  if (!confirm('確定要刪除這個款式嗎？')) return;
+  data = data.filter(x => x.id !== pid);
+  renderAdmin();
+  populateFilters();
+  renderCustomer();
+  save();
+  showToast('款式已刪除');
+}
+
+function previewNewImg(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    newImgData = ev.target.result;
+    const prev = document.getElementById('new-img-preview');
+    prev.src = newImgData; prev.style.display = 'block';
+    document.querySelector('#new-upload-area .upload-icon').style.display = 'none';
+    document.querySelector('#new-upload-area .upload-text').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+function updateImg(e, pid) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const p = data.find(x => x.id === pid);
+    if (p) {
+      p.img = ev.target.result;
+      save();
+      renderAdmin();
+      renderCustomer();
+      showToast('圖片已更新');
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function addProduct() {
+  const name = document.getElementById('a-name').value.trim();
+  const brand = document.getElementById('a-brand').value.trim();
+  const powersRaw = document.getElementById('a-powers').value.trim();
+  const qty = parseInt(document.getElementById('a-qty').value) || 0;
+  if (!name || !brand || !powersRaw) { showToast('請填寫名稱、品牌和度數'); return; }
+  const pArr = powersRaw.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n) && n > 0);
+  if (!pArr.length) { showToast('請輸入正確的度數'); return; }
+  const powers = {};
+  pArr.forEach(p => powers[p] = qty);
+  data.push({ id: nextId++, name, brand, img: newImgData, powers });
+  document.getElementById('a-name').value = '';
+  document.getElementById('a-brand').value = '';
+  document.getElementById('a-powers').value = '';
+  document.getElementById('a-qty').value = '10';
+  document.getElementById('new-img-preview').style.display = 'none';
+  document.querySelector('#new-upload-area .upload-icon').style.display = '';
+  document.querySelector('#new-upload-area .upload-text').style.display = '';
+  newImgData = null;
+  save(); renderAdmin(); populateFilters(); renderCustomer();
+  showToast('款式已新增！');
+}
+
+async function saveAll() {
+  document.querySelectorAll('[data-pid]').forEach(inp => {
+    const pid = parseInt(inp.dataset.pid);
+    const pw = Number(inp.dataset.pw);
+    const p = data.find(x => x.id === pid);
+    if (p) p.powers[pw] = Math.max(0, parseInt(inp.value) || 0);
+  });
+  await save();
+  renderAdmin(); populateFilters(); renderCustomer();
+  showToast('儲存成功！');
+}
+
+// ── TOAST ──
+let toastT;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastT);
+  toastT = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ── INIT ──
+load();
+</script>
+</body>
+</html>
