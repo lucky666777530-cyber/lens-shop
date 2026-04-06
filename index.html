@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>隱形眼鏡特賣</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg:#0a0a0a;--bg2:#111;--bg3:#181818;--bg4:#222;
@@ -14,14 +14,14 @@
   --green:#4caf7d;--red:#e05555;--amber:#e0a040;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-html{background:var(--bg);color:var(--text);font-family:'Noto Sans TC',sans-serif;font-weight:300;}
+html{background:var(--bg);color:var(--text);font-family:'Nunito','Noto Sans TC',sans-serif;font-weight:400;}
 body{min-height:100vh;}
 header{position:sticky;top:0;z-index:100;background:rgba(10,10,10,0.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;}
-.logo{font-family:'Cormorant Garamond',serif;font-size:20px;letter-spacing:3px;color:var(--gold);}
+.logo{font-family:'Nunito',sans-serif;font-size:20px;letter-spacing:3px;color:var(--gold);}
 .refresh-btn{font-size:12px;border:1px solid var(--border2);padding:6px 14px;border-radius:20px;cursor:pointer;background:none;color:var(--text2);font-family:inherit;transition:all 0.2s;letter-spacing:1px;}
 .refresh-btn:hover{color:var(--gold);border-color:var(--gold);}
 .hero{padding:48px 20px 28px;text-align:center;}
-.hero-title{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;letter-spacing:4px;color:var(--gold);margin-bottom:8px;}
+.hero-title{font-family:'Nunito',sans-serif;font-size:32px;font-weight:300;letter-spacing:4px;color:var(--gold);margin-bottom:8px;}
 .hero-sub{font-size:11px;color:var(--text3);letter-spacing:3px;text-transform:uppercase;}
 .filter-section{padding:0 16px 20px;}
 .filter-label{font-size:11px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
@@ -56,7 +56,7 @@ select:focus{outline:none;border-color:var(--gold);}
 .modal-img{width:100%;aspect-ratio:4/3;background:var(--bg3);overflow:hidden;}
 .modal-img img{width:100%;height:100%;object-fit:cover;}
 .modal-content{padding:20px;}
-.modal-name{font-family:'Cormorant Garamond',serif;font-size:26px;color:var(--gold);margin-bottom:2px;}
+.modal-name{font-family:'Nunito',sans-serif;font-size:26px;color:var(--gold);margin-bottom:2px;}
 .modal-type{font-size:11px;color:var(--text3);letter-spacing:3px;margin-bottom:20px;}
 .modal-section-title{font-size:10px;color:var(--text3);letter-spacing:3px;text-transform:uppercase;margin-bottom:10px;}
 .power-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);}
@@ -164,8 +164,9 @@ function renderPage() {
 
   document.getElementById('main-content').innerHTML = `
     <div class="hero">
-      <div class="hero-title">特賣出清</div>
-      <div class="hero-sub">Contact Lens Sale</div>
+      <div class="hero-title">現貨區</div>
+      <div class="hero-sub">下單後馬上寄出</div>
+      <div style="font-size:12px;color:var(--text3);margin-top:12px;letter-spacing:1px;line-height:1.8;">看好款式度數後截圖傳至官方 LINE 下單即可</div>
     </div>
     <div class="filter-section">
       <div class="filter-label">篩選條件</div>
