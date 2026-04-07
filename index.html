@@ -105,7 +105,7 @@ select:focus{outline:none;border-color:var(--gold);}
 <div class="toast" id="toast"></div>
 
 <script>
-const SHEET_ID = '1qk1sI8GgFRkIyteRhoDmqibTrvb09g8Vka1S43i4IlA';
+const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vShErx9e-z44oK9XnlIV1iY7OlUshIbpQRyRSNrNor69d28RKBFmlj7LQo-xvggvoOtxmuEJmlHHPlb/pub?output=csv';
 let products = [];
 let filtered = [];
 
@@ -113,7 +113,7 @@ async function loadData() {
   document.getElementById('main-content').innerHTML =
     '<div class="loading"><div class="spinner"></div><div class="loading-text">載入中...</div></div>';
   try {
-    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&t=${Date.now()}`;
+    const url = `${CSV_URL}&t=${Date.now()}`;
     const res = await fetch(url);
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const csv = await res.text();
